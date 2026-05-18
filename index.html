@@ -37,11 +37,19 @@
     .option-row input { margin-bottom: 0; }
     .form-label { font-size: 13px; color: #555; margin-bottom: 4px; display: block; }
     .form-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-    .radio-label { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 6px; cursor: pointer; font-size: 14px; transition: background 0.15s; }
+    .radio-label { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 6px; cursor: pointer; font-size: 14px; }
     .radio-label:hover { background: #f0f4ff; }
     .radio-label.selected { border-color: #1a56db; background: #e8f0fe; }
     .thankyou { text-align: center; padding: 2rem; }
     .thankyou .icon { font-size: 3rem; margin-bottom: 0.5rem; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.25rem; }
+    .stat-card { background: #f0f4ff; border-radius: 8px; padding: 1rem; text-align: center; }
+    .stat-card .stat-value { font-size: 2rem; font-weight: 700; color: #1a56db; }
+    .stat-card .stat-label { font-size: 13px; color: #555; margin-top: 4px; }
+    .progress-row { margin-bottom: 10px; }
+    .progress-row-header { display: flex; justify-content: space-between; font-size: 13px; color: #444; margin-bottom: 4px; }
+    .progress-bar-bg { background: #e8e8e8; border-radius: 99px; height: 10px; overflow: hidden; }
+    .progress-bar-fill { background: #1a56db; height: 100%; border-radius: 99px; transition: width 0.4s ease; }
   </style>
 </head>
 <body>
@@ -57,7 +65,13 @@ const initialSurveys = [
       { id: 1, text: "Com valores el contingut?", options: ["Molt bo", "Bo", "Regular", "Dolent"] },
       { id: 2, text: "Recomanaries el curs?", options: ["Sí", "Potser", "No"] }
     ],
-    responses: []
+    responses: [
+      { questionId: 1, optionIndex: 0 },
+      { questionId: 1, optionIndex: 1 },
+      { questionId: 1, optionIndex: 1 },
+      { questionId: 2, optionIndex: 0 },
+      { questionId: 2, optionIndex: 0 },
+    ]
   }
 ];
 
@@ -76,7 +90,6 @@ function App() {
   const selectedSurvey = surveys.find(s => s.id === selectedId);
 
   function showMsg(msg) { setToast(msg); setTimeout(() => setToast(null), 3000); }
-
   function goList() { setView("list"); setAnswers({}); setAnswered(false); }
 
   function handleDuplicate(survey) {
@@ -216,34 +229,63 @@ function App() {
                     <p style={{ fontWeight: 600, fontSize: 14, marginBottom: 10 }}>{q.text}</p>
                     {q.options.map((opt, oi) => (
                       <label key={oi} className={`radio-label ${answers[q.id] === oi ? "selected" : ""}`}>
-                        <input
-                          type="radio"
-                          name={`q-${q.id}`}
-                          checked={answers[q.id] === oi}
-                          onChange={() => setAnswers(a => ({ ...a, [q.id]: oi }))}
-                          style={{ width: "auto", margin: 0 }}
-                        />
+                        <input type="radio" name={`q-${q.id}`} checked={answers[q.id] === oi} onChange={() => setAnswers(a => ({ ...a, [q.id]: oi }))} style={{ width: "auto", margin: 0 }} />
                         {opt}
                       </label>
                     ))}
                   </div>
                 ))}
                 <div className="form-actions">
-                  <button className="btn-primary" onClick={handleSubmitAnswers} disabled={!allAnswered}>
-                    Enviar resposta
-                  </button>
+                  <button className="btn-primary" onClick={handleSubmitAnswers} disabled={!allAnswered}>Enviar resposta</button>
                 </div>
               </div>
             )}
           </div>
         )}
 
-        {/* VISTA RESULTATS PENDENT */}
-        {view === "results" && (
-          <div className="card" style={{ textAlign: "center", padding: "2rem", color: "#999" }}>
-            Vista "resultats" — pròximament!
-            <br />
-            <button style={{ marginTop: "1rem" }} onClick={goList}>← Tornar</button>
+        {/* VISTA RESULTATS */}
+        {view === "results" && selectedSurvey && (
+          <div>
+            <button onClick={goList} style={{ marginBottom: "1rem" }}>← Tornar</button>
+            <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: "1rem" }}>{selectedSurvey.title}</h2>
+
+            <div className="stats-grid">
+              <div className="stat-card">
+                <div className="stat-value">{selectedSurvey.questions.length}</div>
+                <div className="stat-label">Preguntes</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-value">{selectedSurvey.responses.length}</div>
+                <div className="stat-label">Respostes totals</div>
+              </div>
+            </div>
+
+            {selectedSurvey.questions.map(q => {
+              const qResponses = selectedSurvey.responses.filter(r => r.questionId === q.id);
+              const total = qResponses.length;
+              return (
+                <div key={q.id} className="card">
+                  <p style={{ fontWeight: 600, fontSize: 15, marginBottom: 12 }}>{q.text}</p>
+                  {total === 0 && <p style={{ fontSize: 13, color: "#999" }}>Encara no hi ha respostes per a aquesta pregunta.</p>}
+                  {q.options.map((opt, oi) => {
+                    const count = qResponses.filter(r => r.optionIndex === oi).length;
+                    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+                    return (
+                      <div key={oi} className="progress-row">
+                        <div className="progress-row-header">
+                          <span>{opt}</span>
+                          <span style={{ color: "#777" }}>{count} ({pct}%)</span>
+                        </div>
+                        <div className="progress-bar-bg">
+                          <div className="progress-bar-fill" style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <p style={{ fontSize: 12, color: "#aaa", marginTop: 8 }}>Total: {total} respostes</p>
+                </div>
+              );
+            })}
           </div>
         )}
       </main>
