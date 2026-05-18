@@ -13,13 +13,15 @@
     .container { max-width: 700px; margin: 0 auto; }
     header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
     h1 { font-size: 1.6rem; }
-    select { padding: 4px 8px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; }
+    select, input { padding: 6px 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; width: 100%; margin-bottom: 6px; }
+    select { width: auto; }
     button { padding: 6px 14px; border-radius: 6px; border: 1px solid #ccc; background: #fff; cursor: pointer; font-size: 14px; }
     button:hover { background: #f0f0f0; }
     .btn-primary { background: #1a56db; color: #fff; border-color: #1a56db; }
     .btn-primary:hover { background: #1546b8; }
     .btn-danger { color: #c0392b; border-color: #c0392b; }
     .btn-danger:hover { background: #fdecea; }
+    .btn-sm { padding: 4px 10px; font-size: 12px; }
     .card { background: #fff; border: 1px solid #ddd; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 12px; }
     .card-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
     .badge { font-size: 11px; padding: 2px 8px; border-radius: 6px; background: #e8f0fe; color: #1a56db; margin-right: 6px; }
@@ -27,6 +29,12 @@
     .survey-title { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
     .survey-meta { font-size: 13px; color: #777; margin-top: 4px; }
     .confirm-msg { background: #e6f4ea; color: #276749; border: 1px solid #b7dfca; border-radius: 8px; padding: 8px 14px; margin-bottom: 12px; font-size: 14px; }
+    .question-block { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 12px; }
+    .question-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .option-row { display: flex; gap: 6px; align-items: center; margin-bottom: 4px; }
+    .option-row input { margin-bottom: 0; }
+    .form-label { font-size: 13px; color: #555; margin-bottom: 4px; display: block; }
+    .form-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
   </style>
 </head>
 <body>
@@ -46,12 +54,18 @@ const initialSurveys = [
   }
 ];
 
+const emptyNewSurvey = () => ({
+  title: "",
+  questions: [{ text: "", options: ["", ""] }]
+});
+
 function App() {
   const [view, setView] = useState("list");
   const [role, setRole] = useState("admin");
   const [surveys, setSurveys] = useState(initialSurveys);
   const [selectedId, setSelectedId] = useState(null);
   const [toast, setToast] = useState(null);
+  const [newSurvey, setNewSurvey] = useState(emptyNewSurvey());
 
   function showMsg(msg) {
     setToast(msg);
@@ -75,6 +89,65 @@ function App() {
     showMsg("Enquesta eliminada.");
   }
 
+  function handleCreateSave() {
+    if (!newSurvey.title.trim()) { alert("Afegeix un títol."); return; }
+    const valid = newSurvey.questions.every(q => q.text.trim() && q.options.every(o => o.trim()));
+    if (!valid) { alert("Omple totes les preguntes i opcions."); return; }
+    const survey = {
+      id: Date.now(),
+      title: newSurvey.title,
+      questions: newSurvey.questions.map((q, i) => ({ ...q, id: i + 1 })),
+      responses: [],
+      active: true
+    };
+    setSurveys(prev => [...prev, survey]);
+    setNewSurvey(emptyNewSurvey());
+    showMsg("Enquesta creada correctament.");
+    setView("list");
+  }
+
+  function updateQuestion(qi, field, value) {
+    setNewSurvey(p => {
+      const qs = [...p.questions];
+      qs[qi] = { ...qs[qi], [field]: value };
+      return { ...p, questions: qs };
+    });
+  }
+
+  function updateOption(qi, oi, value) {
+    setNewSurvey(p => {
+      const qs = [...p.questions];
+      const opts = [...qs[qi].options];
+      opts[oi] = value;
+      qs[qi] = { ...qs[qi], options: opts };
+      return { ...p, questions: qs };
+    });
+  }
+
+  function addOption(qi) {
+    setNewSurvey(p => {
+      const qs = [...p.questions];
+      qs[qi] = { ...qs[qi], options: [...qs[qi].options, ""] };
+      return { ...p, questions: qs };
+    });
+  }
+
+  function removeOption(qi, oi) {
+    setNewSurvey(p => {
+      const qs = [...p.questions];
+      qs[qi] = { ...qs[qi], options: qs[qi].options.filter((_, i) => i !== oi) };
+      return { ...p, questions: qs };
+    });
+  }
+
+  function addQuestion() {
+    setNewSurvey(p => ({ ...p, questions: [...p.questions, { text: "", options: ["", ""] }] }));
+  }
+
+  function removeQuestion(qi) {
+    setNewSurvey(p => ({ ...p, questions: p.questions.filter((_, i) => i !== qi) }));
+  }
+
   return (
     <div className="container">
       <header>
@@ -91,6 +164,7 @@ function App() {
       {toast && <div className="confirm-msg">✓ {toast}</div>}
 
       <main>
+        {/* VISTA LLISTA */}
         {view === "list" && (
           <div>
             {role === "admin" && (
@@ -121,9 +195,7 @@ function App() {
                     )}
                     {role === "admin" && (
                       <>
-                        <button onClick={() => { setSelectedId(s.id); setView("results"); }}>
-                          Resultats
-                        </button>
+                        <button onClick={() => { setSelectedId(s.id); setView("results"); }}>Resultats</button>
                         <button onClick={() => handleDuplicate(s)}>Duplicar</button>
                         <button className="btn-danger" onClick={() => handleDelete(s.id)}>Eliminar</button>
                       </>
@@ -135,7 +207,62 @@ function App() {
           </div>
         )}
 
-        {view !== "list" && (
+        {/* VISTA CREAR */}
+        {view === "create" && (
+          <div className="card">
+            <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: "1rem" }}>Nova enquesta</h2>
+
+            <label className="form-label">Títol de l'enquesta</label>
+            <input
+              placeholder="Ex: Satisfacció del servei"
+              value={newSurvey.title}
+              onChange={e => setNewSurvey(p => ({ ...p, title: e.target.value }))}
+            />
+
+            <div style={{ marginTop: "1rem" }}>
+              {newSurvey.questions.map((q, qi) => (
+                <div key={qi} className="question-block">
+                  <div className="question-header">
+                    <span style={{ fontWeight: 600, fontSize: 14 }}>Pregunta {qi + 1}</span>
+                    {newSurvey.questions.length > 1 && (
+                      <button className="btn-sm btn-danger" onClick={() => removeQuestion(qi)}>✕ Eliminar</button>
+                    )}
+                  </div>
+                  <input
+                    placeholder="Text de la pregunta"
+                    value={q.text}
+                    onChange={e => updateQuestion(qi, "text", e.target.value)}
+                  />
+                  <label className="form-label" style={{ marginTop: 6 }}>Opcions:</label>
+                  {q.options.map((opt, oi) => (
+                    <div key={oi} className="option-row">
+                      <input
+                        placeholder={`Opció ${oi + 1}`}
+                        value={opt}
+                        onChange={e => updateOption(qi, oi, e.target.value)}
+                      />
+                      {q.options.length > 2 && (
+                        <button className="btn-sm btn-danger" onClick={() => removeOption(qi, oi)}>✕</button>
+                      )}
+                    </div>
+                  ))}
+                  <button className="btn-sm" style={{ marginTop: 4 }} onClick={() => addOption(qi)}>
+                    + Afegir opció
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="form-actions">
+              <button onClick={addQuestion}>+ Afegir pregunta</button>
+              <button className="btn-primary" onClick={handleCreateSave}>✓ Crear enquesta</button>
+              <button onClick={() => { setNewSurvey(emptyNewSurvey()); setView("list"); }}>✕ Cancel·lar</button>
+            </div>
+          </div>
+        )}
+
+        {/* VISTES PENDENTS */}
+        {(view === "answer" || view === "results") && (
           <div className="card" style={{ textAlign: "center", padding: "2rem", color: "#999" }}>
             Vista "{view}" — pròximament!
             <br />
