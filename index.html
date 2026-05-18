@@ -14,6 +14,19 @@
     header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
     h1 { font-size: 1.6rem; }
     select { padding: 4px 8px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; }
+    button { padding: 6px 14px; border-radius: 6px; border: 1px solid #ccc; background: #fff; cursor: pointer; font-size: 14px; }
+    button:hover { background: #f0f0f0; }
+    .btn-primary { background: #1a56db; color: #fff; border-color: #1a56db; }
+    .btn-primary:hover { background: #1546b8; }
+    .btn-danger { color: #c0392b; border-color: #c0392b; }
+    .btn-danger:hover { background: #fdecea; }
+    .card { background: #fff; border: 1px solid #ddd; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 12px; }
+    .card-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .badge { font-size: 11px; padding: 2px 8px; border-radius: 6px; background: #e8f0fe; color: #1a56db; margin-right: 6px; }
+    .btn-group { display: flex; gap: 6px; flex-shrink: 0; }
+    .survey-title { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+    .survey-meta { font-size: 13px; color: #777; margin-top: 4px; }
+    .confirm-msg { background: #e6f4ea; color: #276749; border: 1px solid #b7dfca; border-radius: 8px; padding: 8px 14px; margin-bottom: 12px; font-size: 14px; }
   </style>
 </head>
 <body>
@@ -37,6 +50,30 @@ function App() {
   const [view, setView] = useState("list");
   const [role, setRole] = useState("admin");
   const [surveys, setSurveys] = useState(initialSurveys);
+  const [selectedId, setSelectedId] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  function showMsg(msg) {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  }
+
+  function handleDuplicate(survey) {
+    const copy = {
+      ...survey,
+      id: Date.now(),
+      title: survey.title + " (còpia)",
+      responses: [],
+      questions: survey.questions.map(q => ({ ...q, id: Date.now() + Math.random() }))
+    };
+    setSurveys(prev => [...prev, copy]);
+    showMsg("Enquesta duplicada correctament.");
+  }
+
+  function handleDelete(id) {
+    setSurveys(prev => prev.filter(s => s.id !== id));
+    showMsg("Enquesta eliminada.");
+  }
 
   return (
     <div className="container">
@@ -50,8 +87,61 @@ function App() {
           </select>
         </div>
       </header>
+
+      {toast && <div className="confirm-msg">✓ {toast}</div>}
+
       <main>
-        <p style={{color: "#999"}}>Vista: {view}</p>
+        {view === "list" && (
+          <div>
+            {role === "admin" && (
+              <button className="btn-primary" onClick={() => setView("create")} style={{ marginBottom: "1rem" }}>
+                + Nova enquesta
+              </button>
+            )}
+            {surveys.length === 0 && (
+              <div className="card" style={{ textAlign: "center", padding: "2rem", color: "#999" }}>
+                No hi ha enquestes. Crea'n una!
+              </div>
+            )}
+            {surveys.map(s => (
+              <div key={s.id} className="card">
+                <div className="card-row">
+                  <div>
+                    <div className="survey-title">{s.title}</div>
+                    <div className="survey-meta">
+                      <span className="badge">{s.questions.length} preguntes</span>
+                      <span className="badge">{s.responses.length} respostes</span>
+                    </div>
+                  </div>
+                  <div className="btn-group">
+                    {role === "user" && (
+                      <button onClick={() => { setSelectedId(s.id); setView("answer"); }}>
+                        Respondre
+                      </button>
+                    )}
+                    {role === "admin" && (
+                      <>
+                        <button onClick={() => { setSelectedId(s.id); setView("results"); }}>
+                          Resultats
+                        </button>
+                        <button onClick={() => handleDuplicate(s)}>Duplicar</button>
+                        <button className="btn-danger" onClick={() => handleDelete(s.id)}>Eliminar</button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {view !== "list" && (
+          <div className="card" style={{ textAlign: "center", padding: "2rem", color: "#999" }}>
+            Vista "{view}" — pròximament!
+            <br />
+            <button style={{ marginTop: "1rem" }} onClick={() => setView("list")}>← Tornar</button>
+          </div>
+        )}
       </main>
     </div>
   );
