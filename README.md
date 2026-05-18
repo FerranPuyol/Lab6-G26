@@ -50,3 +50,13 @@ statistics of the selected survey. It should:
 - If there are no responses yet, show a message saying so
 - Include a "Tornar" button to go back to the list view
 
+Prompt 6:
+Improve the visual design of the survey app. Keep all functionality intact but upgrade the styles:
+- Add a clean navbar with a logo icon and the app title
+- Use a modern color palette with a primary blue (#1a56db) and soft backgrounds
+- Improve cards with subtle shadows and hover effects
+- Style badges with different colors (questions in blue, responses in green)
+- Make buttons more polished with rounded corners and smooth transitions
+- Improve the progress bars in the results view with rounded ends and a gradient fill
+- Add a footer with the app name
+- Make the overall layout feel more professional and modern
