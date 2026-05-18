@@ -67,3 +67,7 @@ Improve the visual design of the survey app. Keep all functionality intact but u
 - Improve the progress bars in the results view with rounded ends and a gradient fill
 - Add a footer with the app name
 - Make the overall layout feel more professional and modern
+
+### Reflexió sobre l'ús de GitHub Copilot
+
+GitHub Copilot ha estat clau per automatitzar el codi rutinari i dissenyar una interfície moderna en React de forma incremental, actuant com un assistent de *pair programming*. [span_0](start_span)No obstant això, la supervisió humana ha estat imprescindible per guiar l'eina de forma iterativa i interpretar correctament els criteris d'acceptació del document de requisits[span_0](end_span). Això demostra que l'èxit del projecte depèn directament de la precisió dels nostres *prompts* i de la capacitat de validar i refinar el codi proposat per l'IA.
