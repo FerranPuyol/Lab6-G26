@@ -19,4 +19,14 @@ In App.jsx, implement the survey list view (when view === 'list'). It should:
 - Deleting should remove the survey from the array
 - After duplicating or deleting, show a confirmation message (alert or inline message)
 
-- 
+Prompt 3:
+Add the "create" view to the survey app. When view === 'create', show a form where 
+the administrator can:
+- Enter a survey title (text input)
+- Add questions, each with a text field and at least 2 answer options (text inputs)
+- Add more options to each question with an "Afegir opció" button
+- Add more questions with an "Afegir pregunta" button
+- Remove individual questions and options
+- Save the survey with a "Crear enquesta" button (validates all fields are filled, 
+  adds it to the surveys array, shows confirmation message and returns to list view)
+- Cancel with a "Cancel·lar" button that returns to list view
