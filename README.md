@@ -7,6 +7,8 @@ Create a React application for a survey management system. Set up the main App.j
 - Use useState to manage: current view (list/create/answer/results), current role, and a surveys array with one sample survey
 - The sample survey should have a title, an array of questions (each with text and options array), and a responses array
 
+![alt text](image.png)
+
 Use only React hooks, no external libraries.
 
 Prompt 2:
@@ -18,6 +20,8 @@ In App.jsx, implement the survey list view (when view === 'list'). It should:
 - Duplicating a survey should create a copy with title + " (còpia)" and empty responses array
 - Deleting should remove the survey from the array
 - After duplicating or deleting, show a confirmation message (alert or inline message)
+
+![alt text](image-2.png)
 
 Prompt 3:
 Add the "create" view to the survey app. When view === 'create', show a form where 
@@ -31,6 +35,7 @@ the administrator can:
   adds it to the surveys array, shows confirmation message and returns to list view)
 - Cancel with a "Cancel·lar" button that returns to list view
 
+![alt text](image-1.png)
 Prompt 4:
 Add the "answer" view to the survey app. When view === 'answer', show the selected 
 survey questions so the user can answer them anonymously. It should:
@@ -40,6 +45,7 @@ survey questions so the user can answer them anonymously. It should:
 - On submit, save the responses to the survey's responses array
 - Show a thank you confirmation message after submitting
 - Include a "Tornar" button to go back to the list view
+![alt text](image-4.png)
 
 Prompt 5:
 Add the "results" view to the survey app. When view === 'results', show the 
@@ -50,6 +56,7 @@ statistics of the selected survey. It should:
 - If there are no responses yet, show a message saying so
 - Include a "Tornar" button to go back to the list view
 
+![alt text](image-3.png)
 Prompt 6:
 Improve the visual design of the survey app. Keep all functionality intact but upgrade the styles:
 - Add a clean navbar with a logo icon and the app title
