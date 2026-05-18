@@ -13,12 +13,13 @@
     .container { max-width: 700px; margin: 0 auto; }
     header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
     h1 { font-size: 1.6rem; }
-    select, input { padding: 6px 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; width: 100%; margin-bottom: 6px; }
+    select, input[type="text"] { padding: 6px 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; width: 100%; margin-bottom: 6px; }
     select { width: auto; }
     button { padding: 6px 14px; border-radius: 6px; border: 1px solid #ccc; background: #fff; cursor: pointer; font-size: 14px; }
     button:hover { background: #f0f0f0; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
     .btn-primary { background: #1a56db; color: #fff; border-color: #1a56db; }
-    .btn-primary:hover { background: #1546b8; }
+    .btn-primary:hover:not(:disabled) { background: #1546b8; }
     .btn-danger { color: #c0392b; border-color: #c0392b; }
     .btn-danger:hover { background: #fdecea; }
     .btn-sm { padding: 4px 10px; font-size: 12px; }
@@ -29,12 +30,18 @@
     .survey-title { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
     .survey-meta { font-size: 13px; color: #777; margin-top: 4px; }
     .confirm-msg { background: #e6f4ea; color: #276749; border: 1px solid #b7dfca; border-radius: 8px; padding: 8px 14px; margin-bottom: 12px; font-size: 14px; }
+    .info-msg { background: #e8f0fe; color: #1a56db; border: 1px solid #b3c9f9; border-radius: 8px; padding: 8px 14px; margin-bottom: 16px; font-size: 14px; }
     .question-block { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 12px; }
     .question-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
     .option-row { display: flex; gap: 6px; align-items: center; margin-bottom: 4px; }
     .option-row input { margin-bottom: 0; }
     .form-label { font-size: 13px; color: #555; margin-bottom: 4px; display: block; }
     .form-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .radio-label { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 6px; cursor: pointer; font-size: 14px; transition: background 0.15s; }
+    .radio-label:hover { background: #f0f4ff; }
+    .radio-label.selected { border-color: #1a56db; background: #e8f0fe; }
+    .thankyou { text-align: center; padding: 2rem; }
+    .thankyou .icon { font-size: 3rem; margin-bottom: 0.5rem; }
   </style>
 </head>
 <body>
@@ -54,10 +61,7 @@ const initialSurveys = [
   }
 ];
 
-const emptyNewSurvey = () => ({
-  title: "",
-  questions: [{ text: "", options: ["", ""] }]
-});
+const emptyNewSurvey = () => ({ title: "", questions: [{ text: "", options: ["", ""] }] });
 
 function App() {
   const [view, setView] = useState("list");
@@ -66,87 +70,49 @@ function App() {
   const [selectedId, setSelectedId] = useState(null);
   const [toast, setToast] = useState(null);
   const [newSurvey, setNewSurvey] = useState(emptyNewSurvey());
+  const [answers, setAnswers] = useState({});
+  const [answered, setAnswered] = useState(false);
 
-  function showMsg(msg) {
-    setToast(msg);
-    setTimeout(() => setToast(null), 3000);
-  }
+  const selectedSurvey = surveys.find(s => s.id === selectedId);
+
+  function showMsg(msg) { setToast(msg); setTimeout(() => setToast(null), 3000); }
+
+  function goList() { setView("list"); setAnswers({}); setAnswered(false); }
 
   function handleDuplicate(survey) {
-    const copy = {
-      ...survey,
-      id: Date.now(),
-      title: survey.title + " (còpia)",
-      responses: [],
-      questions: survey.questions.map(q => ({ ...q, id: Date.now() + Math.random() }))
-    };
+    const copy = { ...survey, id: Date.now(), title: survey.title + " (còpia)", responses: [], questions: survey.questions.map(q => ({ ...q, id: Date.now() + Math.random() })) };
     setSurveys(prev => [...prev, copy]);
     showMsg("Enquesta duplicada correctament.");
   }
 
-  function handleDelete(id) {
-    setSurveys(prev => prev.filter(s => s.id !== id));
-    showMsg("Enquesta eliminada.");
-  }
+  function handleDelete(id) { setSurveys(prev => prev.filter(s => s.id !== id)); showMsg("Enquesta eliminada."); }
 
   function handleCreateSave() {
     if (!newSurvey.title.trim()) { alert("Afegeix un títol."); return; }
     const valid = newSurvey.questions.every(q => q.text.trim() && q.options.every(o => o.trim()));
     if (!valid) { alert("Omple totes les preguntes i opcions."); return; }
-    const survey = {
-      id: Date.now(),
-      title: newSurvey.title,
-      questions: newSurvey.questions.map((q, i) => ({ ...q, id: i + 1 })),
-      responses: [],
-      active: true
-    };
+    const survey = { id: Date.now(), title: newSurvey.title, questions: newSurvey.questions.map((q, i) => ({ ...q, id: i + 1 })), responses: [] };
     setSurveys(prev => [...prev, survey]);
     setNewSurvey(emptyNewSurvey());
     showMsg("Enquesta creada correctament.");
     setView("list");
   }
 
-  function updateQuestion(qi, field, value) {
-    setNewSurvey(p => {
-      const qs = [...p.questions];
-      qs[qi] = { ...qs[qi], [field]: value };
-      return { ...p, questions: qs };
-    });
+  function handleSubmitAnswers() {
+    const newResponses = Object.entries(answers).map(([qId, optIdx]) => ({ questionId: Number(qId), optionIndex: optIdx }));
+    setSurveys(prev => prev.map(s => s.id === selectedId ? { ...s, responses: [...s.responses, ...newResponses] } : s));
+    setAnswered(true);
+    showMsg("Resposta enviada anònimament. Gràcies!");
   }
 
-  function updateOption(qi, oi, value) {
-    setNewSurvey(p => {
-      const qs = [...p.questions];
-      const opts = [...qs[qi].options];
-      opts[oi] = value;
-      qs[qi] = { ...qs[qi], options: opts };
-      return { ...p, questions: qs };
-    });
-  }
+  const allAnswered = selectedSurvey && selectedSurvey.questions.every(q => answers[q.id] !== undefined);
 
-  function addOption(qi) {
-    setNewSurvey(p => {
-      const qs = [...p.questions];
-      qs[qi] = { ...qs[qi], options: [...qs[qi].options, ""] };
-      return { ...p, questions: qs };
-    });
-  }
-
-  function removeOption(qi, oi) {
-    setNewSurvey(p => {
-      const qs = [...p.questions];
-      qs[qi] = { ...qs[qi], options: qs[qi].options.filter((_, i) => i !== oi) };
-      return { ...p, questions: qs };
-    });
-  }
-
-  function addQuestion() {
-    setNewSurvey(p => ({ ...p, questions: [...p.questions, { text: "", options: ["", ""] }] }));
-  }
-
-  function removeQuestion(qi) {
-    setNewSurvey(p => ({ ...p, questions: p.questions.filter((_, i) => i !== qi) }));
-  }
+  function updateQuestion(qi, field, value) { setNewSurvey(p => { const qs = [...p.questions]; qs[qi] = { ...qs[qi], [field]: value }; return { ...p, questions: qs }; }); }
+  function updateOption(qi, oi, value) { setNewSurvey(p => { const qs = [...p.questions]; const opts = [...qs[qi].options]; opts[oi] = value; qs[qi] = { ...qs[qi], options: opts }; return { ...p, questions: qs }; }); }
+  function addOption(qi) { setNewSurvey(p => { const qs = [...p.questions]; qs[qi] = { ...qs[qi], options: [...qs[qi].options, ""] }; return { ...p, questions: qs }; }); }
+  function removeOption(qi, oi) { setNewSurvey(p => { const qs = [...p.questions]; qs[qi] = { ...qs[qi], options: qs[qi].options.filter((_, i) => i !== oi) }; return { ...p, questions: qs }; }); }
+  function addQuestion() { setNewSurvey(p => ({ ...p, questions: [...p.questions, { text: "", options: ["", ""] }] })); }
+  function removeQuestion(qi) { setNewSurvey(p => ({ ...p, questions: p.questions.filter((_, i) => i !== qi) })); }
 
   return (
     <div className="container">
@@ -168,14 +134,10 @@ function App() {
         {view === "list" && (
           <div>
             {role === "admin" && (
-              <button className="btn-primary" onClick={() => setView("create")} style={{ marginBottom: "1rem" }}>
-                + Nova enquesta
-              </button>
+              <button className="btn-primary" onClick={() => setView("create")} style={{ marginBottom: "1rem" }}>+ Nova enquesta</button>
             )}
             {surveys.length === 0 && (
-              <div className="card" style={{ textAlign: "center", padding: "2rem", color: "#999" }}>
-                No hi ha enquestes. Crea'n una!
-              </div>
+              <div className="card" style={{ textAlign: "center", padding: "2rem", color: "#999" }}>No hi ha enquestes. Crea'n una!</div>
             )}
             {surveys.map(s => (
               <div key={s.id} className="card">
@@ -188,18 +150,12 @@ function App() {
                     </div>
                   </div>
                   <div className="btn-group">
-                    {role === "user" && (
-                      <button onClick={() => { setSelectedId(s.id); setView("answer"); }}>
-                        Respondre
-                      </button>
-                    )}
-                    {role === "admin" && (
-                      <>
-                        <button onClick={() => { setSelectedId(s.id); setView("results"); }}>Resultats</button>
-                        <button onClick={() => handleDuplicate(s)}>Duplicar</button>
-                        <button className="btn-danger" onClick={() => handleDelete(s.id)}>Eliminar</button>
-                      </>
-                    )}
+                    {role === "user" && <button onClick={() => { setSelectedId(s.id); setAnswers({}); setAnswered(false); setView("answer"); }}>Respondre</button>}
+                    {role === "admin" && <>
+                      <button onClick={() => { setSelectedId(s.id); setView("results"); }}>Resultats</button>
+                      <button onClick={() => handleDuplicate(s)}>Duplicar</button>
+                      <button className="btn-danger" onClick={() => handleDelete(s.id)}>Eliminar</button>
+                    </>}
                   </div>
                 </div>
               </div>
@@ -211,48 +167,27 @@ function App() {
         {view === "create" && (
           <div className="card">
             <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: "1rem" }}>Nova enquesta</h2>
-
             <label className="form-label">Títol de l'enquesta</label>
-            <input
-              placeholder="Ex: Satisfacció del servei"
-              value={newSurvey.title}
-              onChange={e => setNewSurvey(p => ({ ...p, title: e.target.value }))}
-            />
-
+            <input type="text" placeholder="Ex: Satisfacció del servei" value={newSurvey.title} onChange={e => setNewSurvey(p => ({ ...p, title: e.target.value }))} />
             <div style={{ marginTop: "1rem" }}>
               {newSurvey.questions.map((q, qi) => (
                 <div key={qi} className="question-block">
                   <div className="question-header">
                     <span style={{ fontWeight: 600, fontSize: 14 }}>Pregunta {qi + 1}</span>
-                    {newSurvey.questions.length > 1 && (
-                      <button className="btn-sm btn-danger" onClick={() => removeQuestion(qi)}>✕ Eliminar</button>
-                    )}
+                    {newSurvey.questions.length > 1 && <button className="btn-sm btn-danger" onClick={() => removeQuestion(qi)}>✕ Eliminar</button>}
                   </div>
-                  <input
-                    placeholder="Text de la pregunta"
-                    value={q.text}
-                    onChange={e => updateQuestion(qi, "text", e.target.value)}
-                  />
+                  <input type="text" placeholder="Text de la pregunta" value={q.text} onChange={e => updateQuestion(qi, "text", e.target.value)} />
                   <label className="form-label" style={{ marginTop: 6 }}>Opcions:</label>
                   {q.options.map((opt, oi) => (
                     <div key={oi} className="option-row">
-                      <input
-                        placeholder={`Opció ${oi + 1}`}
-                        value={opt}
-                        onChange={e => updateOption(qi, oi, e.target.value)}
-                      />
-                      {q.options.length > 2 && (
-                        <button className="btn-sm btn-danger" onClick={() => removeOption(qi, oi)}>✕</button>
-                      )}
+                      <input type="text" placeholder={`Opció ${oi + 1}`} value={opt} onChange={e => updateOption(qi, oi, e.target.value)} />
+                      {q.options.length > 2 && <button className="btn-sm btn-danger" onClick={() => removeOption(qi, oi)}>✕</button>}
                     </div>
                   ))}
-                  <button className="btn-sm" style={{ marginTop: 4 }} onClick={() => addOption(qi)}>
-                    + Afegir opció
-                  </button>
+                  <button className="btn-sm" style={{ marginTop: 4 }} onClick={() => addOption(qi)}>+ Afegir opció</button>
                 </div>
               ))}
             </div>
-
             <div className="form-actions">
               <button onClick={addQuestion}>+ Afegir pregunta</button>
               <button className="btn-primary" onClick={handleCreateSave}>✓ Crear enquesta</button>
@@ -261,12 +196,54 @@ function App() {
           </div>
         )}
 
-        {/* VISTES PENDENTS */}
-        {(view === "answer" || view === "results") && (
+        {/* VISTA RESPONDRE */}
+        {view === "answer" && selectedSurvey && (
+          <div>
+            <button onClick={goList} style={{ marginBottom: "1rem" }}>← Tornar</button>
+            {answered ? (
+              <div className="card thankyou">
+                <div className="icon">✅</div>
+                <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>Gràcies per la teva resposta!</h2>
+                <p style={{ color: "#555", marginBottom: "1rem" }}>La teva resposta s'ha registrat de manera anònima.</p>
+                <button className="btn-primary" onClick={goList}>Tornar a la llista</button>
+              </div>
+            ) : (
+              <div className="card">
+                <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: "1rem" }}>{selectedSurvey.title}</h2>
+                <div className="info-msg">🔒 Les teves respostes seran completament anònimes.</div>
+                {selectedSurvey.questions.map((q) => (
+                  <div key={q.id} className="question-block">
+                    <p style={{ fontWeight: 600, fontSize: 14, marginBottom: 10 }}>{q.text}</p>
+                    {q.options.map((opt, oi) => (
+                      <label key={oi} className={`radio-label ${answers[q.id] === oi ? "selected" : ""}`}>
+                        <input
+                          type="radio"
+                          name={`q-${q.id}`}
+                          checked={answers[q.id] === oi}
+                          onChange={() => setAnswers(a => ({ ...a, [q.id]: oi }))}
+                          style={{ width: "auto", margin: 0 }}
+                        />
+                        {opt}
+                      </label>
+                    ))}
+                  </div>
+                ))}
+                <div className="form-actions">
+                  <button className="btn-primary" onClick={handleSubmitAnswers} disabled={!allAnswered}>
+                    Enviar resposta
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* VISTA RESULTATS PENDENT */}
+        {view === "results" && (
           <div className="card" style={{ textAlign: "center", padding: "2rem", color: "#999" }}>
-            Vista "{view}" — pròximament!
+            Vista "resultats" — pròximament!
             <br />
-            <button style={{ marginTop: "1rem" }} onClick={() => setView("list")}>← Tornar</button>
+            <button style={{ marginTop: "1rem" }} onClick={goList}>← Tornar</button>
           </div>
         )}
       </main>
