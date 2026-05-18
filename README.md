@@ -41,3 +41,12 @@ survey questions so the user can answer them anonymously. It should:
 - Show a thank you confirmation message after submitting
 - Include a "Tornar" button to go back to the list view
 
+Prompt 5:
+Add the "results" view to the survey app. When view === 'results', show the 
+statistics of the selected survey. It should:
+- Show a summary with total number of questions and total responses
+- For each question, show a progress bar for each option with the number of 
+  responses and percentage
+- If there are no responses yet, show a message saying so
+- Include a "Tornar" button to go back to the list view
+
