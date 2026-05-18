@@ -30,3 +30,14 @@ the administrator can:
 - Save the survey with a "Crear enquesta" button (validates all fields are filled, 
   adds it to the surveys array, shows confirmation message and returns to list view)
 - Cancel with a "Cancel·lar" button that returns to list view
+
+Prompt 4:
+Add the "answer" view to the survey app. When view === 'answer', show the selected 
+survey questions so the user can answer them anonymously. It should:
+- Show an info message saying responses are anonymous
+- Show each question with radio buttons for each option
+- Only enable the submit button when all questions are answered
+- On submit, save the responses to the survey's responses array
+- Show a thank you confirmation message after submitting
+- Include a "Tornar" button to go back to the list view
+
