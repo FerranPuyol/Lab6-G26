@@ -68,6 +68,15 @@ Improve the visual design of the survey app. Keep all functionality intact but u
 - Add a footer with the app name
 - Make the overall layout feel more professional and modern
 
-### Reflexió sobre l'ús de GitHub Copilot
+### Reflection on the Use of GitHub Copilot
 
-GitHub Copilot ha estat clau per automatitzar el codi rutinari i dissenyar una interfície moderna en React de forma incremental, actuant com un assistent de *pair programming*. [span_0](start_span)No obstant això, la supervisió humana ha estat imprescindible per guiar l'eina de forma iterativa i interpretar correctament els criteris d'acceptació del document de requisits[span_0](end_span). Això demostra que l'èxit del projecte depèn directament de la precisió dels nostres *prompts* i de la capacitat de validar i refinar el codi proposat per l'IA.
+GitHub Copilot has been a key tool as a pair programming assistant, allowing us to automate routine code, structure the React application, and design a visually modern interface very agilely. The iterative development based on six sequential prompts made it easy to make progressive commits to GitHub, ensuring that each functionality was validated before adding the next one. 
+
+However, human supervision was completely essential to interpret and adapt with criteria the cloned acceptance criteria from the user stories (such as managing the "undo" action within the application's flow). In conclusion, the experience demonstrates that the project's success directly depends on the precision of our instructions and the team's critical capacity to refine the code proposed by the AI.
+
+
+Versió en catala traduida
+
+Copilot ha estat una eina clau com a assistent de *pair programming*, permetent-nos automatitzar el codi rutinari, estructurar l'aplicació en React i dissenyar una interfície visualment moderna de forma molt agil. El desenvolupament iteratiu basat en sis *prompts* seqüencials ha facilitat fer les pujades progressives a GitHub, assegurant que cada funcionalitat es validés abans d'afegir-ne la següent. 
+
+No obstant això, la supervisió humana ha estat del tot imprescindible per interpretar i adaptar amb criteri els criteris d'acceptació clonats de les històries d'usuari (com la gestió del "desfer"" en el flux de l'aplicació). En conclusió, l'experiència demostra que l'èxit del projecte depen directament de la precisió de les nostres instruccions y de la capacitat crítica del equip per refinar el codi proposat per la IA.
