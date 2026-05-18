@@ -9,47 +9,63 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: sans-serif; background: #f5f5f5; padding: 2rem; }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f4ff; min-height: 100vh; display: flex; flex-direction: column; }
+    .navbar { background: #1a56db; color: white; padding: 0.9rem 2rem; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 8px rgba(26,86,219,0.3); }
+    .navbar-brand { display: flex; align-items: center; gap: 10px; font-size: 1.2rem; font-weight: 700; letter-spacing: 0.3px; }
+    .navbar-brand .logo { background: white; color: #1a56db; border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 16px; }
+    .navbar-right { display: flex; align-items: center; gap: 10px; font-size: 14px; }
+    .navbar-right label { color: rgba(255,255,255,0.85); }
+    .navbar-right select { padding: 4px 10px; border-radius: 20px; border: none; font-size: 13px; background: rgba(255,255,255,0.15); color: white; cursor: pointer; outline: none; }
+    .navbar-right select option { color: #333; background: white; }
+    .main-content { flex: 1; padding: 2rem; }
     .container { max-width: 700px; margin: 0 auto; }
-    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
-    h1 { font-size: 1.6rem; }
-    select, input[type="text"] { padding: 6px 10px; border-radius: 6px; border: 1px solid #ccc; font-size: 14px; width: 100%; margin-bottom: 6px; }
-    select { width: auto; }
-    button { padding: 6px 14px; border-radius: 6px; border: 1px solid #ccc; background: #fff; cursor: pointer; font-size: 14px; }
-    button:hover { background: #f0f0f0; }
-    button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .page-title { font-size: 1.4rem; font-weight: 700; color: #1e293b; margin-bottom: 1.25rem; }
+    input[type="text"] { padding: 8px 12px; border-radius: 8px; border: 1.5px solid #d1d5db; font-size: 14px; width: 100%; margin-bottom: 8px; transition: border 0.2s; outline: none; }
+    input[type="text"]:focus { border-color: #1a56db; box-shadow: 0 0 0 3px rgba(26,86,219,0.1); }
+    button { padding: 7px 16px; border-radius: 8px; border: 1.5px solid #d1d5db; background: #fff; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.15s; }
+    button:hover { background: #f1f5f9; border-color: #94a3b8; }
+    button:active { transform: scale(0.98); }
+    button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
     .btn-primary { background: #1a56db; color: #fff; border-color: #1a56db; }
-    .btn-primary:hover:not(:disabled) { background: #1546b8; }
-    .btn-danger { color: #c0392b; border-color: #c0392b; }
-    .btn-danger:hover { background: #fdecea; }
-    .btn-sm { padding: 4px 10px; font-size: 12px; }
-    .card { background: #fff; border: 1px solid #ddd; border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 12px; }
+    .btn-primary:hover:not(:disabled) { background: #1546b8; border-color: #1546b8; }
+    .btn-danger { color: #dc2626; border-color: #fca5a5; background: #fff; }
+    .btn-danger:hover { background: #fef2f2; border-color: #dc2626; }
+    .btn-sm { padding: 4px 10px; font-size: 12px; border-radius: 6px; }
+    .btn-ghost { border-color: transparent; background: transparent; color: #64748b; }
+    .btn-ghost:hover { background: #f1f5f9; border-color: #e2e8f0; color: #1e293b; }
+    .card { background: #fff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 1.1rem 1.35rem; margin-bottom: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.05); transition: box-shadow 0.2s; }
+    .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
     .card-row { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-    .badge { font-size: 11px; padding: 2px 8px; border-radius: 6px; background: #e8f0fe; color: #1a56db; margin-right: 6px; }
-    .btn-group { display: flex; gap: 6px; flex-shrink: 0; }
-    .survey-title { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
-    .survey-meta { font-size: 13px; color: #777; margin-top: 4px; }
-    .confirm-msg { background: #e6f4ea; color: #276749; border: 1px solid #b7dfca; border-radius: 8px; padding: 8px 14px; margin-bottom: 12px; font-size: 14px; }
-    .info-msg { background: #e8f0fe; color: #1a56db; border: 1px solid #b3c9f9; border-radius: 8px; padding: 8px 14px; margin-bottom: 16px; font-size: 14px; }
-    .question-block { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 12px; }
+    .badge { font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 20px; margin-right: 6px; }
+    .badge-blue { background: #dbeafe; color: #1d4ed8; }
+    .badge-green { background: #dcfce7; color: #15803d; }
+    .btn-group { display: flex; gap: 6px; flex-shrink: 0; flex-wrap: wrap; }
+    .survey-title { font-weight: 700; font-size: 15px; margin-bottom: 5px; color: #1e293b; }
+    .survey-meta { font-size: 13px; color: #64748b; margin-top: 4px; }
+    .confirm-msg { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; border-radius: 10px; padding: 10px 16px; margin-bottom: 14px; font-size: 14px; font-weight: 500; }
+    .info-msg { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; border-radius: 10px; padding: 10px 16px; margin-bottom: 16px; font-size: 14px; }
+    .question-block { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 0.85rem 1rem; margin-bottom: 12px; }
     .question-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .option-row { display: flex; gap: 6px; align-items: center; margin-bottom: 4px; }
+    .question-num { font-weight: 700; font-size: 13px; color: #1a56db; }
+    .option-row { display: flex; gap: 6px; align-items: center; margin-bottom: 5px; }
     .option-row input { margin-bottom: 0; }
-    .form-label { font-size: 13px; color: #555; margin-bottom: 4px; display: block; }
-    .form-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-    .radio-label { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 6px; cursor: pointer; font-size: 14px; }
-    .radio-label:hover { background: #f0f4ff; }
-    .radio-label.selected { border-color: #1a56db; background: #e8f0fe; }
-    .thankyou { text-align: center; padding: 2rem; }
-    .thankyou .icon { font-size: 3rem; margin-bottom: 0.5rem; }
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 1.25rem; }
-    .stat-card { background: #f0f4ff; border-radius: 8px; padding: 1rem; text-align: center; }
-    .stat-card .stat-value { font-size: 2rem; font-weight: 700; color: #1a56db; }
-    .stat-card .stat-label { font-size: 13px; color: #555; margin-top: 4px; }
-    .progress-row { margin-bottom: 10px; }
-    .progress-row-header { display: flex; justify-content: space-between; font-size: 13px; color: #444; margin-bottom: 4px; }
-    .progress-bar-bg { background: #e8e8e8; border-radius: 99px; height: 10px; overflow: hidden; }
-    .progress-bar-fill { background: #1a56db; height: 100%; border-radius: 99px; transition: width 0.4s ease; }
+    .form-label { font-size: 13px; color: #64748b; margin-bottom: 4px; display: block; font-weight: 500; }
+    .form-actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+    .radio-label { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border: 1.5px solid #e2e8f0; border-radius: 10px; margin-bottom: 7px; cursor: pointer; font-size: 14px; transition: all 0.15s; color: #1e293b; }
+    .radio-label:hover { background: #eff6ff; border-color: #93c5fd; }
+    .radio-label.selected { border-color: #1a56db; background: #eff6ff; font-weight: 600; }
+    .thankyou { text-align: center; padding: 2.5rem; }
+    .thankyou .icon { font-size: 3.5rem; margin-bottom: 0.75rem; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 1.25rem; }
+    .stat-card { background: linear-gradient(135deg, #1a56db, #3b82f6); border-radius: 12px; padding: 1.1rem; text-align: center; color: white; }
+    .stat-card .stat-value { font-size: 2.2rem; font-weight: 800; }
+    .stat-card .stat-label { font-size: 13px; opacity: 0.85; margin-top: 4px; }
+    .progress-row { margin-bottom: 12px; }
+    .progress-row-header { display: flex; justify-content: space-between; font-size: 13px; color: #374151; margin-bottom: 5px; font-weight: 500; }
+    .progress-bar-bg { background: #e2e8f0; border-radius: 99px; height: 10px; overflow: hidden; }
+    .progress-bar-fill { background: linear-gradient(90deg, #1a56db, #3b82f6); height: 100%; border-radius: 99px; transition: width 0.5s ease; }
+    footer { background: #1e293b; color: #94a3b8; text-align: center; padding: 1rem; font-size: 13px; }
+    footer span { color: #1a56db; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -128,168 +144,192 @@ function App() {
   function removeQuestion(qi) { setNewSurvey(p => ({ ...p, questions: p.questions.filter((_, i) => i !== qi) })); }
 
   return (
-    <div className="container">
-      <header>
-        <h1>App d'Enquestes</h1>
-        <div>
-          <label>Rol: </label>
+    <>
+      <nav className="navbar">
+        <div className="navbar-brand">
+          <div className="logo">E</div>
+          App d'Enquestes
+        </div>
+        <div className="navbar-right">
+          <label>Rol:</label>
           <select value={role} onChange={e => setRole(e.target.value)}>
             <option value="admin">Administrador</option>
             <option value="user">Usuari</option>
           </select>
         </div>
-      </header>
+      </nav>
 
-      {toast && <div className="confirm-msg">✓ {toast}</div>}
+      <div className="main-content">
+        <div className="container">
 
-      <main>
-        {/* VISTA LLISTA */}
-        {view === "list" && (
-          <div>
-            {role === "admin" && (
-              <button className="btn-primary" onClick={() => setView("create")} style={{ marginBottom: "1rem" }}>+ Nova enquesta</button>
-            )}
-            {surveys.length === 0 && (
-              <div className="card" style={{ textAlign: "center", padding: "2rem", color: "#999" }}>No hi ha enquestes. Crea'n una!</div>
-            )}
-            {surveys.map(s => (
-              <div key={s.id} className="card">
-                <div className="card-row">
-                  <div>
-                    <div className="survey-title">{s.title}</div>
-                    <div className="survey-meta">
-                      <span className="badge">{s.questions.length} preguntes</span>
-                      <span className="badge">{s.responses.length} respostes</span>
-                    </div>
-                  </div>
-                  <div className="btn-group">
-                    {role === "user" && <button onClick={() => { setSelectedId(s.id); setAnswers({}); setAnswered(false); setView("answer"); }}>Respondre</button>}
-                    {role === "admin" && <>
-                      <button onClick={() => { setSelectedId(s.id); setView("results"); }}>Resultats</button>
-                      <button onClick={() => handleDuplicate(s)}>Duplicar</button>
-                      <button className="btn-danger" onClick={() => handleDelete(s.id)}>Eliminar</button>
-                    </>}
-                  </div>
-                </div>
+          {toast && <div className="confirm-msg">✓ {toast}</div>}
+
+          {/* VISTA LLISTA */}
+          {view === "list" && (
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
+                <h2 className="page-title" style={{ margin: 0 }}>Les meves enquestes</h2>
+                {role === "admin" && (
+                  <button className="btn-primary" onClick={() => setView("create")}>+ Nova enquesta</button>
+                )}
               </div>
-            ))}
-          </div>
-        )}
-
-        {/* VISTA CREAR */}
-        {view === "create" && (
-          <div className="card">
-            <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: "1rem" }}>Nova enquesta</h2>
-            <label className="form-label">Títol de l'enquesta</label>
-            <input type="text" placeholder="Ex: Satisfacció del servei" value={newSurvey.title} onChange={e => setNewSurvey(p => ({ ...p, title: e.target.value }))} />
-            <div style={{ marginTop: "1rem" }}>
-              {newSurvey.questions.map((q, qi) => (
-                <div key={qi} className="question-block">
-                  <div className="question-header">
-                    <span style={{ fontWeight: 600, fontSize: 14 }}>Pregunta {qi + 1}</span>
-                    {newSurvey.questions.length > 1 && <button className="btn-sm btn-danger" onClick={() => removeQuestion(qi)}>✕ Eliminar</button>}
-                  </div>
-                  <input type="text" placeholder="Text de la pregunta" value={q.text} onChange={e => updateQuestion(qi, "text", e.target.value)} />
-                  <label className="form-label" style={{ marginTop: 6 }}>Opcions:</label>
-                  {q.options.map((opt, oi) => (
-                    <div key={oi} className="option-row">
-                      <input type="text" placeholder={`Opció ${oi + 1}`} value={opt} onChange={e => updateOption(qi, oi, e.target.value)} />
-                      {q.options.length > 2 && <button className="btn-sm btn-danger" onClick={() => removeOption(qi, oi)}>✕</button>}
+              {surveys.length === 0 && (
+                <div className="card" style={{ textAlign: "center", padding: "2.5rem", color: "#94a3b8" }}>
+                  <div style={{ fontSize: "2.5rem", marginBottom: 8 }}>📋</div>
+                  No hi ha enquestes. Crea'n una!
+                </div>
+              )}
+              {surveys.map(s => (
+                <div key={s.id} className="card">
+                  <div className="card-row">
+                    <div>
+                      <div className="survey-title">{s.title}</div>
+                      <div className="survey-meta">
+                        <span className="badge badge-blue">{s.questions.length} preguntes</span>
+                        <span className="badge badge-green">{s.responses.length} respostes</span>
+                      </div>
                     </div>
-                  ))}
-                  <button className="btn-sm" style={{ marginTop: 4 }} onClick={() => addOption(qi)}>+ Afegir opció</button>
+                    <div className="btn-group">
+                      {role === "user" && <button className="btn-primary" onClick={() => { setSelectedId(s.id); setAnswers({}); setAnswered(false); setView("answer"); }}>Respondre</button>}
+                      {role === "admin" && <>
+                        <button onClick={() => { setSelectedId(s.id); setView("results"); }}>📊 Resultats</button>
+                        <button onClick={() => handleDuplicate(s)}>⧉ Duplicar</button>
+                        <button className="btn-danger" onClick={() => handleDelete(s.id)}>🗑 Eliminar</button>
+                      </>}
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
-            <div className="form-actions">
-              <button onClick={addQuestion}>+ Afegir pregunta</button>
-              <button className="btn-primary" onClick={handleCreateSave}>✓ Crear enquesta</button>
-              <button onClick={() => { setNewSurvey(emptyNewSurvey()); setView("list"); }}>✕ Cancel·lar</button>
-            </div>
-          </div>
-        )}
+          )}
 
-        {/* VISTA RESPONDRE */}
-        {view === "answer" && selectedSurvey && (
-          <div>
-            <button onClick={goList} style={{ marginBottom: "1rem" }}>← Tornar</button>
-            {answered ? (
-              <div className="card thankyou">
-                <div className="icon">✅</div>
-                <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>Gràcies per la teva resposta!</h2>
-                <p style={{ color: "#555", marginBottom: "1rem" }}>La teva resposta s'ha registrat de manera anònima.</p>
-                <button className="btn-primary" onClick={goList}>Tornar a la llista</button>
+          {/* VISTA CREAR */}
+          {view === "create" && (
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "1.25rem" }}>
+                <button className="btn-ghost btn-sm" onClick={() => { setNewSurvey(emptyNewSurvey()); setView("list"); }}>← Tornar</button>
+                <h2 className="page-title" style={{ margin: 0 }}>Nova enquesta</h2>
               </div>
-            ) : (
               <div className="card">
-                <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: "1rem" }}>{selectedSurvey.title}</h2>
-                <div className="info-msg">🔒 Les teves respostes seran completament anònimes.</div>
-                {selectedSurvey.questions.map((q) => (
-                  <div key={q.id} className="question-block">
-                    <p style={{ fontWeight: 600, fontSize: 14, marginBottom: 10 }}>{q.text}</p>
-                    {q.options.map((opt, oi) => (
-                      <label key={oi} className={`radio-label ${answers[q.id] === oi ? "selected" : ""}`}>
-                        <input type="radio" name={`q-${q.id}`} checked={answers[q.id] === oi} onChange={() => setAnswers(a => ({ ...a, [q.id]: oi }))} style={{ width: "auto", margin: 0 }} />
-                        {opt}
-                      </label>
-                    ))}
-                  </div>
-                ))}
-                <div className="form-actions">
-                  <button className="btn-primary" onClick={handleSubmitAnswers} disabled={!allAnswered}>Enviar resposta</button>
+                <label className="form-label">Títol de l'enquesta</label>
+                <input type="text" placeholder="Ex: Satisfacció del servei" value={newSurvey.title} onChange={e => setNewSurvey(p => ({ ...p, title: e.target.value }))} />
+                <div style={{ marginTop: "1rem" }}>
+                  {newSurvey.questions.map((q, qi) => (
+                    <div key={qi} className="question-block">
+                      <div className="question-header">
+                        <span className="question-num">Pregunta {qi + 1}</span>
+                        {newSurvey.questions.length > 1 && <button className="btn-sm btn-danger" onClick={() => removeQuestion(qi)}>✕ Eliminar</button>}
+                      </div>
+                      <input type="text" placeholder="Text de la pregunta" value={q.text} onChange={e => updateQuestion(qi, "text", e.target.value)} />
+                      <label className="form-label" style={{ marginTop: 6 }}>Opcions de resposta:</label>
+                      {q.options.map((opt, oi) => (
+                        <div key={oi} className="option-row">
+                          <input type="text" placeholder={`Opció ${oi + 1}`} value={opt} onChange={e => updateOption(qi, oi, e.target.value)} />
+                          {q.options.length > 2 && <button className="btn-sm btn-danger" onClick={() => removeOption(qi, oi)}>✕</button>}
+                        </div>
+                      ))}
+                      <button className="btn-sm" style={{ marginTop: 4 }} onClick={() => addOption(qi)}>+ Afegir opció</button>
+                    </div>
+                  ))}
                 </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* VISTA RESULTATS */}
-        {view === "results" && selectedSurvey && (
-          <div>
-            <button onClick={goList} style={{ marginBottom: "1rem" }}>← Tornar</button>
-            <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: "1rem" }}>{selectedSurvey.title}</h2>
-
-            <div className="stats-grid">
-              <div className="stat-card">
-                <div className="stat-value">{selectedSurvey.questions.length}</div>
-                <div className="stat-label">Preguntes</div>
-              </div>
-              <div className="stat-card">
-                <div className="stat-value">{selectedSurvey.responses.length}</div>
-                <div className="stat-label">Respostes totals</div>
+                <div className="form-actions">
+                  <button onClick={addQuestion}>+ Afegir pregunta</button>
+                  <button className="btn-primary" onClick={handleCreateSave}>✓ Crear enquesta</button>
+                  <button className="btn-danger" onClick={() => { setNewSurvey(emptyNewSurvey()); setView("list"); }}>✕ Cancel·lar</button>
+                </div>
               </div>
             </div>
+          )}
 
-            {selectedSurvey.questions.map(q => {
-              const qResponses = selectedSurvey.responses.filter(r => r.questionId === q.id);
-              const total = qResponses.length;
-              return (
-                <div key={q.id} className="card">
-                  <p style={{ fontWeight: 600, fontSize: 15, marginBottom: 12 }}>{q.text}</p>
-                  {total === 0 && <p style={{ fontSize: 13, color: "#999" }}>Encara no hi ha respostes per a aquesta pregunta.</p>}
-                  {q.options.map((opt, oi) => {
-                    const count = qResponses.filter(r => r.optionIndex === oi).length;
-                    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-                    return (
-                      <div key={oi} className="progress-row">
-                        <div className="progress-row-header">
-                          <span>{opt}</span>
-                          <span style={{ color: "#777" }}>{count} ({pct}%)</span>
-                        </div>
-                        <div className="progress-bar-bg">
-                          <div className="progress-bar-fill" style={{ width: `${pct}%` }} />
-                        </div>
-                      </div>
-                    );
-                  })}
-                  <p style={{ fontSize: 12, color: "#aaa", marginTop: 8 }}>Total: {total} respostes</p>
+          {/* VISTA RESPONDRE */}
+          {view === "answer" && selectedSurvey && (
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "1.25rem" }}>
+                <button className="btn-ghost btn-sm" onClick={goList}>← Tornar</button>
+                <h2 className="page-title" style={{ margin: 0 }}>{selectedSurvey.title}</h2>
+              </div>
+              {answered ? (
+                <div className="card thankyou">
+                  <div className="icon">✅</div>
+                  <h2 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8, color: "#1e293b" }}>Gràcies per la teva resposta!</h2>
+                  <p style={{ color: "#64748b", marginBottom: "1.25rem" }}>La teva resposta s'ha registrat de manera anònima.</p>
+                  <button className="btn-primary" onClick={goList}>Tornar a la llista</button>
                 </div>
-              );
-            })}
-          </div>
-        )}
-      </main>
-    </div>
+              ) : (
+                <div className="card">
+                  <div className="info-msg">🔒 Les teves respostes seran completament anònimes.</div>
+                  {selectedSurvey.questions.map((q, qi) => (
+                    <div key={q.id} className="question-block">
+                      <p style={{ fontWeight: 700, fontSize: 14, marginBottom: 10, color: "#1e293b" }}>{qi + 1}. {q.text}</p>
+                      {q.options.map((opt, oi) => (
+                        <label key={oi} className={`radio-label ${answers[q.id] === oi ? "selected" : ""}`}>
+                          <input type="radio" name={`q-${q.id}`} checked={answers[q.id] === oi} onChange={() => setAnswers(a => ({ ...a, [q.id]: oi }))} style={{ width: "auto", margin: 0, accentColor: "#1a56db" }} />
+                          {opt}
+                        </label>
+                      ))}
+                    </div>
+                  ))}
+                  <div className="form-actions">
+                    <button className="btn-primary" onClick={handleSubmitAnswers} disabled={!allAnswered}>Enviar resposta</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* VISTA RESULTATS */}
+          {view === "results" && selectedSurvey && (
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: "1.25rem" }}>
+                <button className="btn-ghost btn-sm" onClick={goList}>← Tornar</button>
+                <h2 className="page-title" style={{ margin: 0 }}>Resultats: {selectedSurvey.title}</h2>
+              </div>
+              <div className="stats-grid">
+                <div className="stat-card">
+                  <div className="stat-value">{selectedSurvey.questions.length}</div>
+                  <div className="stat-label">Preguntes</div>
+                </div>
+                <div className="stat-card">
+                  <div className="stat-value">{selectedSurvey.responses.length}</div>
+                  <div className="stat-label">Respostes totals</div>
+                </div>
+              </div>
+              {selectedSurvey.questions.map(q => {
+                const qResponses = selectedSurvey.responses.filter(r => r.questionId === q.id);
+                const total = qResponses.length;
+                return (
+                  <div key={q.id} className="card">
+                    <p style={{ fontWeight: 700, fontSize: 15, marginBottom: 12, color: "#1e293b" }}>{q.text}</p>
+                    {total === 0 && <p style={{ fontSize: 13, color: "#94a3b8" }}>Encara no hi ha respostes per a aquesta pregunta.</p>}
+                    {q.options.map((opt, oi) => {
+                      const count = qResponses.filter(r => r.optionIndex === oi).length;
+                      const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+                      return (
+                        <div key={oi} className="progress-row">
+                          <div className="progress-row-header">
+                            <span>{opt}</span>
+                            <span style={{ color: "#64748b" }}>{count} ({pct}%)</span>
+                          </div>
+                          <div className="progress-bar-bg">
+                            <div className="progress-bar-fill" style={{ width: `${pct}%` }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <p style={{ fontSize: 12, color: "#94a3b8", marginTop: 10 }}>Total: {total} respostes</p>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+        </div>
+      </div>
+
+      <footer>
+        Fet amb ❤️ · <span>App d'Enquestes</span>
+      </footer>
+    </>
   );
 }
 
